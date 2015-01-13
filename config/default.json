@@ -1,0 +1,13 @@
+{
+  "host": "http://localhost",
+  "port": 3000,
+  "staticPath": "public/src",
+  "apiHost": "http://project.ci/api",
+  "accountHost": "http://account.project.ci",
+  "spiderHost": "",
+  "spiderClientId": "",
+  "langs": ["zh", "en"],
+  "sessionName": "TEAMBITION_SESSIONID",
+  "sessionSecret": "access_token",
+  "tokenSecret": "tokenSecretXXX"
+}
