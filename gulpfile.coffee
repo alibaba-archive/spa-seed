@@ -94,7 +94,7 @@ gulp.task('watch', ->
   gulp.watch(paths.scripts, ['coffee']);
 )
 
-gulp.task('test', gulpSequence('jshint', 'mocha'))
+gulp.task('test-server', gulpSequence('jshint', 'web', 'mocha'))
 gulp.task('web', gulpSequence('coffeelint', 'clean', ['bower_components', 'fonts', 'less', 'coffee', 'views', 'images']))
 gulp.task('default', gulpSequence('web'))
 

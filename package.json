@@ -4,7 +4,7 @@
   "authors": [
     "Yan Qing <admin@zensh.com>"
   ],
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "app.js",
   "repository": {
     "type": "git",
@@ -22,12 +22,11 @@
   ],
   "dependencies": {
     "config": "^1.9.0",
-    "ejs": "^2.0.7",
     "thunks": "^2.7.1",
     "toa": "^0.6.5",
     "toa-body": "^1.1.0",
     "toa-compress": "^1.1.1",
-    "toa-ejs": "^1.0.1",
+    "toa-ejs": "^1.0.2",
     "toa-favicon": "^1.0.1",
     "toa-router": "^0.3.0",
     "toa-static": "^0.3.0",
@@ -51,11 +50,12 @@
     "gulp-rev": ">=0.4.2",
     "gulp-sequence": ">=0.2.0",
     "gulp-uglify": ">=0.3.1",
-    "gulp-usemin": ">=0.3.6"
+    "gulp-usemin": ">=0.3.6",
+    "supertest": "^0.15.0"
   },
   "scripts": {
     "start": "NODE_ENV=development node --harmony app.js",
-    "test": "NODE_ENV=development node --harmony `which gulp` test"
+    "test": "NODE_ENV=development node --harmony `which gulp` test-server"
   },
   "ignore": [
     "**/.*",

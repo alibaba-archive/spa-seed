@@ -81,7 +81,7 @@ toaBody(app, {
 });
 
 // 启动 server
-app.listen(config.port);
+module.exports = app.listen(config.port);
 
 // 输出启动信息
 logInfo('app:', {
