@@ -1,7 +1,7 @@
 'use strict';
 
-module.exports = function*(Thunk) {
-  yield this.render('index', {
+module.exports = function(Thunk) {
+  return this.render('index', {
     user: this.user,
     ua: this.clientInfo
   });
