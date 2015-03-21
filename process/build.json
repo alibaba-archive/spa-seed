@@ -1,0 +1,9 @@
+{
+  "name": "spa",
+  "script": "./app.js",
+  "exec_mode": "cluster_mode",
+  "instances": 1,
+  "env": {
+    "NODE_ENV": "build"
+  }
+}

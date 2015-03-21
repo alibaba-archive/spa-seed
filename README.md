@@ -13,7 +13,6 @@ Simple page application seed for teambition.
 3. 提供了简单的 API 接口，可以很方便的改成 mock API；
 
 本项目只是一个模板项目，你只需要复制本项目，然后根据需求修改成自己的项目即可。
-本项目兼容 node.js v0.10.x，若具备条件，推荐使用 node.js v0.11.x 甚至 iojs，因为用 `yield` 处理异步流程确实很优美。
 
 本项目基于 [Toa](https://github.com/toajs/toa) 和 [thunks](https://github.com/thunks/thunks)。前者类似 [koa](https://github.com/koajs/koa)，是一个先进的 node.js server 框架。后者是一个小巧强大的异步流程控制工具，支持 promise、thunk 和 generator，并且对浏览器端全兼容。
 

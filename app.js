@@ -1,69 +1,91 @@
 'use strict';
+/*jshint -W124*/
 
-var util = require('util');
+const util = require('util');
 
-var Toa = require('toa');
-var config = require('config');
-var toaEjs = require('toa-ejs');
-var toaBody = require('toa-body');
-var toaToken = require('toa-token');
-var UAParser = require('ua-parser-js');
+const Toa = require('toa');
+const config = require('config');
+const toaMejs = require('toa-mejs');
+const toaI18n = require('toa-i18n');
+const toaBody = require('toa-body');
+const toaToken = require('toa-token');
+const toaCompress = require('toa-compress');
+const UAParser = require('ua-parser-js');
 
-var cookieAuth = require('./modules/cookieAuth');
-var router = require('./services/router');
-var packageInfo = require('./package.json');
+const tools = require('./services/tools');
+const router = require('./services/router');
+const packageInfo = require('./package.json');
+const cookieAuth = require('./modules/cookieAuth');
 
-var clientParser = new UAParser();
-var isDevelopment = process.env.NODE_ENV === 'development';
-var publicPath = isDevelopment ? 'public/tmp' : 'public/dist';
+/**
+ * 启动服务
+ */
+const clientParser = new UAParser();
+const debugMode = process.argv.indexOf('--debug') !== -1;
 
-var app = Toa(function(Thunk) {
+const app = Toa(function*(Thunk) {
   var path = this.path;
 
   // 解析客户端配置信息
   this.clientInfo = clientParser.setUA(this.get('user-agent')).getResult();
-
-  // 非静态资源请求则解析 session cookie，读取当前用户信息
-  if (path !== '/favicon.ico' && path.indexOf('/static/') !== 0)
-    cookieAuth.call(this);
-
-  // router 处理具体业务
-  return router.route(this, Thunk);
-});
-
-// 设置 session cookie 密钥
-app.keys = [config.sessionSecret];
-
-// 添加必要的 config，`this.config` 可以访问
-app.config = {
-  version: packageInfo.version,
-  sessionName: config.sessionName
-};
-
-// 错误处理
-app.onerror = logErr;
-
-// 添加 ejs render 方法: `this.render(tplName, valueObj)`
-// 参考 https://github.com/toajs/toa-ejs
-toaEjs(app, {
-  root: publicPath + '/views',
-  layout: 'layout',
-  viewExt: 'html',
-  cache: !isDevelopment,
-  debug: isDevelopment,
-  locals: { // 该对象成为 ejs 模板的全局对象
-    config: { // 向前端输出的必要 config，根据需求自行调整
-      name: packageInfo.name,
-      version: packageInfo.version,
-      apiHost: '/api',
-      accountHost: config.accountHost
-    },
-    header: { // 向前端输出的必要 header 内容，根据需求自行调整
-      title: 'SPA Seed',
-      keywords: 'teambition spa seed',
-      description: 'Simple page application seed for teambition'
+  // 对于非静态资源请求，解析用户基本信息
+  if (path !== '/favicon.ico' && !path.startsWith('/static/') && !path.startsWith('/404')) {
+    this.user = cookieAuth(this);
+    // 设置 CSP
+    if (config.cspHead) {
+      this.set({
+        'content-security-policy': config.cspHead,
+        'x-content-security-policy': config.cspHead,
+        'x-webKit-csp': config.cspHead
+      });
     }
   }
+
+  yield router.route(this, Thunk);
+}, function(err) {
+  // API 请求错误默认处理
+  if (this.path.startsWith('/api/')) return;
+  console.error(err.stack);
+  // 其它错误请求重定向到 404
+  this.redirect('/404');
+  return true;
+});
+
+app.keys = config.sessionSecret;
+app.config = {
+  sessionName: config.sessionName
+};
+app.onerror = tools.logErr;
+
+// 添加 ejs render 方法: `this.render(tplName, valueObj)`
+// 参考 https://github.com/toajs/toa-mejs
+toaMejs(app, `${config.publicPath}/views/**/*.html`, {
+  layout: 'layout',
+  locals: {
+    config: {
+      apiHost: '/api',
+      host: config.host,
+      env: app.config.env
+    },
+    locale: function() {
+      return this.locale;
+    },
+    ua: function() {
+      return this.clientInfo;
+    },
+    __: function() {
+      return this.__.apply(this, arguments);
+    },
+    __n: function() {
+      return this.__n.apply(this, arguments);
+    }
+  }
+});
+
+toaI18n(app, {
+  cookie: 'lang',
+  locales: config.langs,
+  directory: './locales'
 });
 
 // token 认证支持，前端 app 应该使用 token 认证，防止 Cross-domain / CORS 攻击
@@ -80,30 +102,20 @@ toaBody(app, {
   }
 });
 
+if (debugMode) {
+  app.use(function*() {
+    var time = Date.now();
+    this.on('end', function() {
+      console.log(`${Date.now() - time}ms`, this.method, this.originalUrl);
+    });
+  });
+}
+
+app.use(toaCompress());
 // 启动 server
 module.exports = app.listen(config.port);
 
-// 输出启动信息
-logInfo('app:', {
-  host: config.host,
+tools.logInfo('app:', {
   listen: config.port,
-  version: packageInfo.version,
   appConfig: app.config
 });
-
-function logInfo(name, obj) {
-  console.log(name, util.inspect(obj, {
-    colors: true
-  }));
-}
-
-function logErr(err) {
-  // 能被 pm2 记录
-  // ignore null and response error
-  if (err == null || (err.status && err.status < 500)) return;
-  if (util.isError(err)) return logInfo('non-error thrown:', err);
-
-  // catch system error
-  var msg = err.stack || err.toString();
-  console.error(msg.replace(/^/gm, '  '));
-}

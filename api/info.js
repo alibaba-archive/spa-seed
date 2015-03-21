@@ -5,11 +5,9 @@
  * 输出用户请求的内容
  * @api public
  */
-exports.echo = function(Thunk) {
+exports.echo = function*() {
   // 如果是异步业务，则必须返回 thunk 或 promise 等，参考 https://github.com/thunks/thunks
-  return this.parseBody(Thunk)(function(err, body) {
-    this.body = body;
-  });
+  this.body = yield this.parseBody();
 };
 
 
@@ -18,7 +16,7 @@ exports.echo = function(Thunk) {
  * 输出当前请求信息及平台信息
  * @api public
  */
-exports.getInfo = function(Thunk) {
+exports.getInfo = function() {
   this.body = {
     ip: this.ip,
     ips: this.ips,

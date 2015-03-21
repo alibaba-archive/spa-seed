@@ -1,16 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="<%= it.locale() %>">
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title><%- header.title %></title>
+    <title><%- it.__('seoTitle') %></title>
     <meta charset="utf-8">
-    <meta name="keywords" content="<%- header.keywords %>">
-    <meta name="description" content="<%- header.description %>">
+    <meta name="keywords" content="<%- it.__('seoKeywords') %>">
+    <meta name="description" content="<%- it.__('seoDescription') %>">
     <meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <%- include style.html %>
+    <meta name="HandheldFriendly" content="true">
+    <link rel="stylesheet" href="/static/css/bootstrap.css"/>
+    <link rel="stylesheet" href="/static/css/app.css"/>
   </head>
-  <body class="">
-    <%- body %>
-    <%- include script.html %>
+  <body class="<%= it.ua().browser.name %>">
+    <%- it.body %>
+    <script id="app-global"
+      data-host="<%= it.config.host %>"
+      data-apihost="<%= it.config.apiHost %>"></script>
+    <% if (it.env == 'development') { %>
+    <script data-main="/static/js/main.js" src="/static/bower/requirejs/require.js"></script>
+    <% } else { %>
+    <script src="/static/js/lib.js"></script>
+    <script src="/static/js/app.js"></script>
+    <% } %>
   </body>
-</html>
+</htmif

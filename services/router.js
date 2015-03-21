@@ -1,48 +1,47 @@
 'use strict';
 
-var Router = require('toa-router');
-var toaStatic = require('toa-static');
-var toaFavicon = require('toa-favicon');
+const config = require('config');
+const Router = require('toa-router');
+const toaStatic = require('toa-static');
+const toaFavicon = require('toa-favicon');
 
-var infoAPI = require('../api/info');
-var userAPI = require('../api/user');
+const infoAPI = require('../api/info');
+const userAPI = require('../api/user');
 
-var indexView = require('../controllers/getIndex');
+const indexView = require('../controllers/getIndex');
 
 // 参考 https://github.com/toajs/toa-router
-var router = module.exports = new Router();
-var isDevelopment = process.env.NODE_ENV === 'development';
-var publicPath = isDevelopment ? 'public/tmp' : 'public/dist';
+const router = module.exports = new Router();
 
 // 配置 favicon 模块
 // 参考 https://github.com/toajs/toa-favicon
-var faviconModule = toaFavicon(publicPath + '/img/favicon.ico');
+const faviconModule = toaFavicon(config.publicPath + '/static/img/favicon.ico');
 
 // 配置静态资源伺服模块
 // 参考 https://github.com/toajs/toa-static
 var staticModule = toaStatic({
-  root: publicPath,
-  prefix: '/static',
-  prunePrefix: true
+  root: config.publicPath,
+  prefix: '/static'
 });
 
 // 配置静态资源路由和 views 路由
 router
   .get('', indexView)
-  .get('/static/(*)', function(Thunk) {
+  .get('/static/(*)', function() {
     return staticModule;
   })
-  .get('/favicon.ico', function(Thunk) {
+  .get('/favicon.ico', function() {
     return faviconModule;
   })
-  .otherwise(function(Thunk) {
+  .otherwise(function() {
     return this.render('404', {
       message: this.path + 'is not found!'
     });
   });
 
 // 配置 API 路由
-router.get('/api/info', infoAPI.getInfo)
+router
+  .get('/api/info', infoAPI.getInfo)
   .post('/api/echo', infoAPI.echo);
 
 router.define('/api/auth')

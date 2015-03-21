@@ -1,11 +1,11 @@
 {
   "name": "spa-seed",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "dependencies": {
     "requirejs": "^2.1.15",
     "jquery": "^2.1.1",
     "almond": "^0.3.0",
-    "thunks": "^2.7.1",
+    "thunks": "^2.7.2",
     "bootstrap": "^3.3.1"
   },
   "devDependencies": {}
