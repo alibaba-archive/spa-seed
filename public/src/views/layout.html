@@ -16,7 +16,7 @@
     <script id="app-global"
       data-host="<%= it.config.host %>"
       data-apihost="<%= it.config.apiHost %>"></script>
-    <% if (it.env == 'development') { %>
+    <% if (it.config.env == 'development') { %>
     <script data-main="/static/js/main.js" src="/static/bower/requirejs/require.js"></script>
     <% } else { %>
     <script src="/static/js/lib.js"></script>

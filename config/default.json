@@ -1,11 +1,20 @@
 {
   "host": "http://localhost",
   "port": 3000,
-  "cdnPrefix": "",
+  "logLevel": 6,
   "publicPath": "public",
   "langs": ["zh", "en"],
   "sessionName": "SID",
   "sessionSecret": ["sessionSecretXX1", "sessionSecretXX2"],
   "tokenSecret": ["tokenSecretXX1", "tokenSecretXX2"],
-  "cspHead": ""
+  "redisHosts": ["127.0.0.1:6379"],
+  "limiter": {
+    "prefix": "SPA",
+    "duration": 60000,
+    "policy": {
+      "PUT": [60, 60000, 20, 60000],
+      "POST": [20, 60000, 5, 60000],
+      "DELETE": [20, 60000, 5, 60000]
+    }
+  }
 }
