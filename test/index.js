@@ -1,51 +1,44 @@
-'use strict';
+'use strict'
+/*global describe, it, after */
 
-/*global describe, it, before, after, beforeEach, afterEach*/
-/*jshint -W124 */
+const thunk = require('thunks')()
+const supertest = require('supertest')
+const server = require('..')
 
-var supertest = require('supertest');
-var server = require('../app');
-
-var request = supertest(server);
-var user = {
+const request = supertest(server)
+const user = {
   id: 'abc',
   name: 'test',
   email: 'test@teambition.com'
-};
+}
 
-describe('SPA Seed', function() {
+describe('SPA Seed', function () {
+  after(function *() {
+    yield thunk.delay(1000)
+    process.exit()
+  })
 
-  after(function() {
-    setTimeout(function() {
-      process.exit();
-    }, 1000);
-  });
-
-  it('get index view', function(done) {
-    request.get('')
+  it('get index view', function *() {
+    yield request.get('')
       .expect(200)
-      .end(done);
-  });
+  })
 
-  it('get favicon.ico', function(done) {
-    request.get('/favicon.ico')
+  it('get favicon.ico', function *() {
+    yield request.get('/favicon.ico')
       .expect(200)
-      .end(done);
-  });
+  })
 
-  it('get /api/info', function(done) {
-    request.get('/api/info')
+  it('get /api/info', function *() {
+    yield request.get('/api/info')
       .expect(200)
       .expect('content-type', /application\/json/)
-      .end(done);
-  });
+  })
 
-  it('post /api/echo', function(done) {
-    request.post('/api/echo')
+  it('post /api/echo', function *() {
+    yield request.post('/api/echo')
       .send(user)
       .expect(200)
       .expect('content-type', /application\/json/)
       .expect(user)
-      .end(done);
-  });
-});
+  })
+})

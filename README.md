@@ -4,7 +4,6 @@ Simple page application seed for teambition.
 
 [![NPM version][npm-image]][npm-url]
 [![Build Status][travis-image]][travis-url]
-[![Talk topic][talk-image]][talk-url]
 
 本项目主要作为 Simple page application 项目模板，也是 Toa 示例项目，主要提供如下功能：
 
@@ -31,12 +30,13 @@ npm start
 
 访问：[http://localhost:3000](http://localhost:3000)
 
-**build:**
+**production:**
 
 ```bash
 npm install
 bower install
 gulp build
+pm2 start pm2/production.json
 ```
 
 [npm-url]: https://npmjs.org/package/spa-seed
@@ -44,6 +44,3 @@ gulp build
 
 [travis-url]: https://travis-ci.org/teambition/spa-seed
 [travis-image]: http://img.shields.io/travis/teambition/spa-seed.svg
-
-[talk-url]: https://guest.talk.ai/rooms/a6a9331024
-[talk-image]: https://img.shields.io/talk/t/a6a9331024.svg

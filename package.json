@@ -11,7 +11,7 @@
     "url": "git@github.com:teambition/spa-seed.git"
   },
   "engines": {
-    "node": ">=1.2.0"
+    "node": ">=4.0.0"
   },
   "homepage": "https://github.com/teambition/spa-seed",
   "keywords": [
@@ -49,25 +49,19 @@
     "gulp-mocha": "^2.2.0",
     "gulp-rev-all": "^0.8.24",
     "gulp-rimraf": "^0.2.0",
+    "gulp-rjs2": "^0.2.1",
     "gulp-sequence": "^0.4.5",
     "gulp-symlink": "^2.1.4",
     "gulp-uglify": "^1.5.3",
     "gulp-util": "^3.0.7",
     "merge2": "^1.0.1",
     "mocha": "^2.4.5",
-    "requirejs": "^2.1.22",
     "standard": "^6.0.8",
-    "through2": "^2.0.1"
+    "supertest": "^1.2.0",
+    "thunk-mocha": "^1.0.3"
   },
   "scripts": {
-    "start": "NODE_ENV=development node app",
-    "test": "NODE_ENV=development gulp test"
-  },
-  "ignore": [
-    "**/.*",
-    "node_modules",
-    "test",
-    "examples",
-    "gulpfile.js"
-  ]
+    "start": "node app",
+    "test": "standard && mocha -t 10000 -r thunk-mocha test/index.js"
+  }
 }

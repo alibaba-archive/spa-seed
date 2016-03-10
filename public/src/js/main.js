@@ -1,5 +1,4 @@
-'use strict';
-/* global module, define */
+'use strict'
 
 require.config({
   paths: {
@@ -10,13 +9,11 @@ require.config({
   shim: {
     'bootstrap': ['jquery']
   }
-});
+})
 
 require([
   'jquery',
   'thunks',
   'global',
   'bootstrap'
-], function($, thunks, global) {
-
-});
+], function ($, thunks, global) {})

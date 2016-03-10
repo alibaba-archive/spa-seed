@@ -1,25 +1,22 @@
 'use strict'
 
 const gulp = require('gulp')
-const config = require('config')
 const merge2 = require('merge2')
-const through = require('through2')
-const requirejs = require('requirejs')
+const rjs = require('gulp-rjs2')
 const less = require('gulp-less')
-const gutil = require('gulp-util')
 const mocha = require('gulp-mocha')
 const clean = require('gulp-rimraf')
 const uglify = require('gulp-uglify')
 const symlink = require('gulp-symlink')
-const revall = require('gulp-rev-all')
+const RevAll = require('gulp-rev-all')
 const sequence = require('gulp-sequence')
 const minifyCSS = require('gulp-minify-css')
 
+const cdnPrefix = ''
 gulp.task('clean', function () {
   return gulp.src([
-    'public/views',
     'public/dist',
-    'public/static'
+    'public/tmp'
   ], {read: false})
     .pipe(clean({force: true}))
 })
@@ -32,27 +29,27 @@ gulp.task('mocha', function () {
 gulp.task('less', function () {
   return gulp.src('public/src/less/app.less')
     .pipe(less())
-    .pipe(gulp.dest('public/static/css'))
+    .pipe(gulp.dest('public/tmp/static/css'))
 })
 
 gulp.task('js', function () {
   return gulp.src('public/src/js/**/*.js')
-    .pipe(gulp.dest('public/static/js'))
+    .pipe(gulp.dest('public/tmp/static/js'))
 })
 
 gulp.task('img', function () {
   return gulp.src('public/src/img/**')
-    .pipe(gulp.dest('public/static/img'))
+    .pipe(gulp.dest('public/tmp/static/img'))
 })
 
 gulp.task('views', function () {
   return gulp.src('public/src/views/**/*.html')
-    .pipe(gulp.dest('public/views'))
+    .pipe(gulp.dest('public/tmp/views'))
 })
 
 gulp.task('bower', function () {
   return gulp.src('public/bower')
-    .pipe(symlink('public/static/bower'))
+    .pipe(symlink('public/tmp/static/bower'))
 })
 
 gulp.task('bootstrap', function () {
@@ -61,15 +58,15 @@ gulp.task('bootstrap', function () {
     'public/bower/bootstrap/dist/css/bootstrap.css',
     'public/bower/bootstrap/dist/css/bootstrap.css.map'
   ], {base: 'public/bower/bootstrap/dist'})
-    .pipe(gulp.dest('public/static'))
+    .pipe(gulp.dest('public/tmp/static'))
 })
 
 gulp.task('rjs-lib', function () {
   return rjs({
-    baseUrl: 'public/static/js',
-    mainConfigFile: 'public/static/js/main.js',
-    name: '../../bower/almond/almond',
-    out: 'js/lib.js',
+    baseUrl: 'public/tmp/static/js',
+    mainConfigFile: 'public/tmp/static/js/main.js',
+    name: '../bower/almond/almond',
+    out: 'lib.js',
     include: ['libraries'],
     insertRequire: ['libraries'],
     removeCombined: true,
@@ -80,15 +77,15 @@ gulp.task('rjs-lib', function () {
     wrap: false
   })
     .pipe(uglify())
-    .pipe(gulp.dest('public/static'))
+    .pipe(gulp.dest('public/tmp/static/js'))
 })
 
 gulp.task('rjs-app', function () {
   return rjs({
-    baseUrl: 'public/static/js',
-    mainConfigFile: 'public/static/js/main.js',
+    baseUrl: 'public/tmp/static/js',
+    mainConfigFile: 'public/tmp/static/js/main.js',
     name: 'main',
-    out: 'js/app.js',
+    out: 'app.js',
     exclude: ['libraries'],
     removeCombined: true,
     findNestedDependencies: true,
@@ -98,27 +95,31 @@ gulp.task('rjs-app', function () {
     wrap: true
   })
     .pipe(uglify())
-    .pipe(gulp.dest('public/static'))
+    .pipe(gulp.dest('public/tmp/static/js'))
 })
 
-gulp.task('rev', function () {
-  return merge2(
-    gulp.src('public/views/**/*.html', {base: 'public'}),
-    gulp.src('public/static/css/*.css', {base: 'public'}).pipe(minifyCSS()),
+gulp.task('revall', function () {
+  let revAll = new RevAll({
+    prefix: cdnPrefix,
+    dontGlobal: [/\/favicon\.ico$/],
+    dontRenameFile: [/\.html$/],
+    dontUpdateReference: [/\.html$/],
+    dontSearchFile: [/\.js$/, /images/]
+  })
+
+  return merge2([
+    gulp.src('public/tmp/views/**/*.html'),
+    gulp.src('public/tmp/static/css/*.css').pipe(minifyCSS({rebase: false})),
     gulp.src([
-      'public/static/js/app.js',
-      'public/static/js/lib.js'
-    ], {base: 'public'}).pipe(uglify()),
+      'public/tmp/static/js/app.js',
+      'public/tmp/static/js/lib.js'
+    ]).pipe(uglify()),
     gulp.src([
-      'public/static/img/**',
-      'public/static/fonts/**'
-    ], {base: 'public'})
-  )
-    .pipe(revall({
-      quiet: true,
-      prefix: config.cdnPrefix,
-      ignore: ['.html']
-    }))
+      'public/tmp/static/img/**',
+      'public/tmp/static/fonts/**'
+    ])
+  ])
+    .pipe(revAll.revision())
     .pipe(gulp.dest('public/dist'))
 })
 
@@ -131,26 +132,5 @@ gulp.task('watch', function () {
 
 gulp.task('test', sequence('mocha'))
 gulp.task('dev', sequence('clean', ['js', 'less', 'img', 'views', 'bootstrap', 'bower']))
-gulp.task('build', sequence('dev', ['rjs-lib', 'rjs-app'], 'rev'))
+gulp.task('build', sequence('dev', ['rjs-lib', 'rjs-app'], 'revall'))
 gulp.task('default', sequence('dev'))
-
-function rjs (options) {
-  var stream = through.obj()
-  var path = options.out
-
-  options.out = function (string) {
-    stream.push(new gutil.File({
-      path: path,
-      contents: new Buffer(string)
-    }))
-  }
-
-  requirejs.optimize(options, function (data) {
-    stream.push(null)
-  }, function (err) {
-    console.error(err)
-    stream.emit('error', err)
-  })
-
-  return stream
-}
