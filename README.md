@@ -36,7 +36,7 @@ npm start
 npm install
 bower install
 gulp build
-pm2 start pm2/production.json
+pm2 start pm2/release.json
 ```
 
 [npm-url]: https://npmjs.org/package/spa-seed
