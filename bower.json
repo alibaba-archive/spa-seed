@@ -1,6 +1,6 @@
 {
   "name": "spa-seed",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "dependencies": {
     "requirejs": "^2.1.15",
     "jquery": "^2.2.0",
